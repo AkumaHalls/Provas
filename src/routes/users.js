@@ -43,7 +43,8 @@ router.post('/profile', isAuthenticated, async (req, res) => {
 router.get('/users', isAuthenticated, async (req, res) => {
   const users = await User.find().sort({ createdAt: -1 }).lean();
   const settings = await Settings.findOne();
-  const isAdmin = req.session.userRole === 'admin';
+  const currentUser = await User.findById(req.session.userId);
+  const isAdmin = currentUser && currentUser.role === 'admin';
   res.render('users', {
     users,
     settings,
