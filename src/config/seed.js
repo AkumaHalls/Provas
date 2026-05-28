@@ -13,6 +13,10 @@ async function seedAdmin() {
       role: 'admin'
     });
     console.log('Usuário admin criado (senha: admin123)');
+  } else if (!existing.role) {
+    existing.role = 'admin';
+    await existing.save();
+    console.log('Admin atualizado com papel de administrador');
   }
 
   const settings = await Settings.findOne();
