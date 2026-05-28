@@ -1,38 +1,14 @@
 const express = require('express');
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
 const crypto = require('crypto');
 const path = require('path');
+const mongoose = require('mongoose');
 const { isAuthenticated } = require('../middleware/auth');
 const Evidence = require('../models/Evidence');
 const { getGridFSBucket } = require('../config/db');
 
 const router = express.Router();
-
-const storage = new GridFsStorage({
-  url: process.env.MONGO_URI,
-  options: { dbName: process.env.DB_NAME || 'sistema_provas' },
-  file: (req, file) => {
-    return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, (err, buf) => {
-        if (err) return reject(err);
-        const filename = buf.toString('hex') + path.extname(file.originalname);
-        const fileInfo = {
-          filename,
-          bucketName: 'uploads',
-          metadata: {
-            originalname: file.originalname,
-            mimetype: file.mimetype,
-            uploader: req.session.userId
-          }
-        };
-        resolve(fileInfo);
-      });
-    });
-  }
-});
-
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', isAuthenticated, async (req, res) => {
   const { plataforma, tipo } = req.query;
@@ -58,7 +34,29 @@ router.get('/new', isAuthenticated, (req, res) => {
 
 router.post('/', isAuthenticated, upload.array('arquivos', 10), async (req, res) => {
   try {
-    const fileIds = req.files ? req.files.map(f => f.id) : [];
+    const bucket = getGridFSBucket();
+    const fileIds = [];
+
+    for (const file of (req.files || [])) {
+      const filename = crypto.randomBytes(16).toString('hex') + path.extname(file.originalname);
+      const id = new mongoose.Types.ObjectId();
+
+      await new Promise((resolve, reject) => {
+        const stream = bucket.openUploadStreamWithId(id, filename, {
+          contentType: file.mimetype,
+          metadata: {
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            uploader: req.session.userId
+          }
+        });
+        stream.end(file.buffer);
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+      });
+
+      fileIds.push(id);
+    }
 
     await Evidence.create({
       plataforma: req.body.plataforma,
@@ -88,10 +86,9 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
 router.get('/file/:id', isAuthenticated, async (req, res) => {
   const bucket = getGridFSBucket();
-  const ObjectId = require('mongoose').Types.ObjectId;
 
   try {
-    const files = await bucket.find({ _id: new ObjectId(req.params.id) }).toArray();
+    const files = await bucket.find({ _id: new mongoose.Types.ObjectId(req.params.id) }).toArray();
     if (!files || files.length === 0) {
       return res.status(404).send('Arquivo não encontrado');
     }
@@ -115,9 +112,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
 
     const bucket = getGridFSBucket();
     for (const fid of ev.fileIds) {
-      try {
-        await bucket.delete(fid);
-      } catch (e) {}
+      try { await bucket.delete(fid); } catch (e) {}
     }
 
     await Evidence.findByIdAndDelete(req.params.id);

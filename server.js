@@ -9,6 +9,7 @@ const { connectDB } = require('./src/config/db');
 const seedAdmin = require('./src/config/seed');
 const authRoutes = require('./src/routes/auth');
 const evidenceRoutes = require('./src/routes/evidence');
+const userRoutes = require('./src/routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 2502;
@@ -35,6 +36,7 @@ app.use(session({
 
 app.use('/', authRoutes);
 app.use('/evidence', evidenceRoutes);
+app.use('/', userRoutes);
 
 app.get('/', (req, res) => {
   if (!req.session.userId) return res.redirect('/login');

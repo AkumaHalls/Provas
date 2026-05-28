@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários - Sistema de Provas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="logo">👥 Usuários</span>
+    <span><a href="/profile">Voltar</a></span>
+  </nav>
+
+  <div class="container">
+    <% if (typeof erro !== 'undefined' && erro) { %>
+      <div class="alert erro"><%= erro %></div>
+    <% } %>
+    <% if (typeof sucesso !== 'undefined' && sucesso) { %>
+      <div class="alert" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9"><%= sucesso %></div>
+    <% } %>
+
+    <h2>Criar Novo Usuário</h2>
+    <form action="/users" method="POST" class="form-container" style="max-width:400px;margin-bottom:2rem">
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" name="nome" required>
+      </div>
+      <div class="form-group">
+        <label>Usuário (login)</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" name="password" required minlength="4">
+      </div>
+      <button type="submit" class="btn btn-full">Criar</button>
+    </form>
+
+    <h2>Usuários Existentes</h2>
+    <div class="card-grid">
+      <% users.forEach(function(u) { %>
+        <div class="card">
+          <div class="card-body">
+            <p><strong><%= u.nome %></strong></p>
+            <p style="color:#666;font-size:0.9rem">@<%= u.username %></p>
+            <p style="color:#888;font-size:0.8rem">Criado em: <%= new Date(u.createdAt).toLocaleDateString('pt-BR') %></p>
+          </div>
+          <% if (u._id.toString() !== userName) { %>
+            <div class="card-footer">
+              <form action="/users/delete/<%= u._id %>" method="POST" onsubmit="return confirm('Excluir este usuário?')">
+                <button type="submit" class="btn-danger">Excluir</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>
