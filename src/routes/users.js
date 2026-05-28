@@ -31,10 +31,11 @@ router.post('/profile', isAuthenticated, async (req, res) => {
       return res.render('profile', { user: user.toObject(), erro: 'Nova senha e confirmação não conferem', sucesso: null, userName: req.session.userName });
     }
 
-    user.password = await bcrypt.hash(novaSenha, 10);
-    await user.save();
+    const hashed = await bcrypt.hash(novaSenha, 10);
+    await User.updateOne({ _id: user._id }, { $set: { password: hashed } });
 
-    res.render('profile', { user: user.toObject(), erro: null, sucesso: 'Senha alterada com sucesso!', userName: req.session.userName });
+    const updatedUser = await User.findById(user._id).lean();
+    res.render('profile', { user: updatedUser, erro: null, sucesso: 'Senha alterada com sucesso!', userName: req.session.userName });
   } catch (err) {
     res.redirect('/profile');
   }

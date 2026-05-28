@@ -13,10 +13,9 @@ async function seedAdmin() {
       role: 'admin'
     });
     console.log('Usuário admin criado (senha: admin123)');
-  } else if (!existing.role) {
-    existing.role = 'admin';
-    await existing.save();
-    console.log('Admin atualizado com papel de administrador');
+  } else {
+    await User.updateOne({ username: 'admin' }, { $set: { role: 'admin' } });
+    console.log('Admin verificado');
   }
 
   const settings = await Settings.findOne();
