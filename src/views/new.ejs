@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Evidência - Sistema de Provas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="logo">📋 Nova Prova</span>
+    <span><a href="/">Voltar</a></span>
+  </nav>
+
+  <div class="container form-container">
+    <h2>Registrar Evidência</h2>
+
+    <% if (typeof erro !== 'undefined' && erro) { %>
+      <div class="alert erro"><%= erro %></div>
+    <% } %>
+
+    <form action="/evidence" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Plataforma *</label>
+        <select name="plataforma" required>
+          <option value="">Selecione...</option>
+          <option value="iFood">iFood</option>
+          <option value="Uber Eats">Uber Eats</option>
+          <option value="99">99</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Problema *</label>
+        <select name="tipoProblema" required>
+          <option value="">Selecione...</option>
+          <option value="Cancelamento">Cancelamento</option>
+          <option value="Atraso">Atraso</option>
+          <option value="Problema no local">Problema no local</option>
+          <option value="Cliente ausente">Cliente ausente</option>
+          <option value="App travou">App travou</option>
+          <option value="Acidente">Acidente</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição do ocorrido *</label>
+        <textarea name="descricao" rows="5" required placeholder="Descreva detalhadamente o que aconteceu..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Data do ocorrido</label>
+          <input type="date" name="dataOcorrido">
+        </div>
+        <div class="form-group half">
+          <label>Valor da corrida</label>
+          <input type="text" name="valorCorrida" placeholder="Ex: R$ 15,90">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Status do pedido</label>
+        <input type="text" name="statusPedido" placeholder="Ex: Cancelado após 30 min">
+      </div>
+
+      <div class="form-group">
+        <label>Arquivos (prints, fotos, etc) - até 10 arquivos</label>
+        <input type="file" name="arquivos" multiple accept="image/*,.pdf,.mp4">
+        <small>Formatos aceitos: imagens, PDF, vídeos</small>
+      </div>
+
+      <button type="submit" class="btn btn-full">Salvar Evidência</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistema de Provas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="logo">📋 Provas</span>
+    <span class="user">Olá, <%= userName %> | <a href="/evidence/new" class="btn-small">Nova Prova</a> | <a href="/logout" class="btn-small">Sair</a></span>
+  </nav>
+
+  <div class="container">
+    <h2>Suas Evidências</h2>
+
+    <form class="filtros" method="GET">
+      <select name="plataforma">
+        <option value="">Todas plataformas</option>
+        <option value="iFood" <%= filtroPlataforma === 'iFood' ? 'selected' : '' %>>iFood</option>
+        <option value="Uber Eats" <%= filtroPlataforma === 'Uber Eats' ? 'selected' : '' %>>Uber Eats</option>
+        <option value="99" <%= filtroPlataforma === '99' ? 'selected' : '' %>>99</option>
+        <option value="Outro" <%= filtroPlataforma === 'Outro' ? 'selected' : '' %>>Outro</option>
+      </select>
+      <select name="tipo">
+        <option value="">Todos os tipos</option>
+        <option value="Cancelamento" <%= filtroTipo === 'Cancelamento' ? 'selected' : '' %>>Cancelamento</option>
+        <option value="Atraso" <%= filtroTipo === 'Atraso' ? 'selected' : '' %>>Atraso</option>
+        <option value="Problema no local" <%= filtroTipo === 'Problema no local' ? 'selected' : '' %>>Problema no local</option>
+        <option value="Cliente ausente" <%= filtroTipo === 'Cliente ausente' ? 'selected' : '' %>>Cliente ausente</option>
+        <option value="App travou" <%= filtroTipo === 'App travou' ? 'selected' : '' %>>App travou</option>
+        <option value="Acidente" <%= filtroTipo === 'Acidente' ? 'selected' : '' %>>Acidente</option>
+        <option value="Outro" <%= filtroTipo === 'Outro' ? 'selected' : '' %>>Outro</option>
+      </select>
+      <button type="submit">Filtrar</button>
+      <a href="/" class="btn-small">Limpar</a>
+    </form>
+
+    <% if (evidencias.length === 0) { %>
+      <div class="empty">
+        <p>Nenhuma evidência registrada ainda.</p>
+        <a href="/evidence/new" class="btn">Registrar Primeira Prova</a>
+      </div>
+    <% } else { %>
+      <div class="card-grid">
+        <% evidencias.forEach(function(ev) { %>
+          <div class="card">
+            <div class="card-header">
+              <span class="badge badge-<%= ev.plataforma.toLowerCase().replace(' ', '-') %>"><%= ev.plataforma %></span>
+              <span class="badge tipo"><%= ev.tipoProblema %></span>
+            </div>
+            <div class="card-body">
+              <p class="data"><%= ev.dataOcorrido ? new Date(ev.dataOcorrido).toLocaleDateString('pt-BR') : '' %></p>
+              <p class="desc"><%= ev.descricao.substring(0, 100) %><%= ev.descricao.length > 100 ? '...' : '' %></p>
+              <% if (ev.fileIds && ev.fileIds.length > 0) { %>
+                <p class="fotos-info">📎 <%= ev.fileIds.length %> arquivo(s)</p>
+              <% } %>
+              <% if (ev.valorCorrida) { %>
+                <p class="valor">💰 <%= ev.valorCorrida %></p>
+              <% } %>
+            </div>
+            <div class="card-footer">
+              <a href="/evidence/<%= ev._id %>" class="btn-small">Ver detalhes</a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

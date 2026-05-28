@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes - Sistema de Provas</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="logo">📋 Detalhes</span>
+    <span><a href="/">Voltar</a></span>
+  </nav>
+
+  <div class="container">
+    <div class="detail-card">
+      <div class="detail-header">
+        <span class="badge badge-<%= ev.plataforma.toLowerCase().replace(' ', '-') %>"><%= ev.plataforma %></span>
+        <span class="badge tipo"><%= ev.tipoProblema %></span>
+      </div>
+
+      <div class="detail-body">
+        <p><strong>Data:</strong> <%= ev.dataOcorrido ? new Date(ev.dataOcorrido).toLocaleString('pt-BR') : '-' %></p>
+        <p><strong>Valor:</strong> <%= ev.valorCorrida || '-' %></p>
+        <p><strong>Status do pedido:</strong> <%= ev.statusPedido || '-' %></p>
+        <p><strong>Criado em:</strong> <%= new Date(ev.createdAt).toLocaleString('pt-BR') %></p>
+        <hr>
+        <p><strong>Descrição:</strong></p>
+        <div class="descricao-texto"><%= ev.descricao %></div>
+      </div>
+
+      <% if (ev.fileIds && ev.fileIds.length > 0) { %>
+        <div class="detail-files">
+          <h3>Arquivos (<%= ev.fileIds.length %>)</h3>
+          <div class="file-grid">
+            <% ev.fileIds.forEach(function(fid) { %>
+              <div class="file-item">
+                <a href="/evidence/file/<%= fid %>" target="_blank">
+                  <img src="/evidence/file/<%= fid %>" alt="Arquivo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                  <span class="file-fallback" style="display:none">📁 Visualizar arquivo</span>
+                </a>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="detail-actions">
+        <form action="/evidence/<%= ev._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Excluir esta evidência? Isso também remove os arquivos.')">
+          <button type="submit" class="btn-danger">Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
