@@ -5,7 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const { isAuthenticated } = require('../middleware/auth');
 const Evidence = require('../models/Evidence');
-const { getGridFSBucket } = require('../config/db');
+const { getGridFSBucket, getDB } = require('../config/db');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -110,9 +110,14 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
       return res.status(403).send('Sem permissão');
     }
 
-    const bucket = getGridFSBucket();
+    const db = getDB();
+    const filesCol = db.collection('uploads.files');
+    const chunksCol = db.collection('uploads.chunks');
+
     for (const fid of ev.fileIds) {
-      try { await bucket.delete(fid); } catch (e) {}
+      const oid = new mongoose.Types.ObjectId(fid);
+      await filesCol.deleteOne({ _id: oid });
+      await chunksCol.deleteMany({ files_id: oid });
     }
 
     await Evidence.findByIdAndDelete(req.params.id);

@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 
-let gridfsBucket;
+let gridfsBucket, db;
 
 async function connectDB() {
   const conn = await mongoose.connect(process.env.MONGO_URI, {
     dbName: process.env.DB_NAME || 'sistema_provas'
   });
 
-  gridfsBucket = new mongoose.mongo.GridFSBucket(conn.connection.db, {
+  db = conn.connection.db;
+  gridfsBucket = new mongoose.mongo.GridFSBucket(db, {
     bucketName: 'uploads'
   });
 
@@ -20,4 +21,9 @@ function getGridFSBucket() {
   return gridfsBucket;
 }
 
-module.exports = { connectDB, getGridFSBucket };
+function getDB() {
+  if (!db) throw new Error('DB not initialized');
+  return db;
+}
+
+module.exports = { connectDB, getGridFSBucket, getDB };
