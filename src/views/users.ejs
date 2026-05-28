@@ -20,36 +20,76 @@
       <div class="alert" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9"><%= sucesso %></div>
     <% } %>
 
-    <h2>Criar Novo Usuário</h2>
-    <form action="/users" method="POST" class="form-container" style="max-width:400px;margin-bottom:2rem">
-      <div class="form-group">
-        <label>Nome</label>
-        <input type="text" name="nome" required>
+    <% if (isAdmin) { %>
+      <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
+        <h3>⚙️ Configurações do Sistema</h3>
+        <form action="/users/settings" method="POST" style="margin-top:1rem">
+          <label style="display:flex;align-items:center;gap:10px;font-size:1rem;cursor:pointer">
+            <input type="checkbox" name="allowRegistration" value="true" <%= settings && settings.allowRegistration ? 'checked' : '' %> onchange="this.form.submit()">
+            <strong>Permitir novos registros de usuários</strong>
+          </label>
+          <p style="color:#888;font-size:0.85rem;margin-top:4px">
+            <%= settings && settings.allowRegistration ? '✅ Novo usuários podem se cadastrar' : '❌ Apenas administradores podem criar usuários' %>
+          </p>
+        </form>
       </div>
-      <div class="form-group">
-        <label>Usuário (login)</label>
-        <input type="text" name="username" required>
+
+      <h2>Criar Novo Usuário</h2>
+      <% if (settings && settings.allowRegistration) { %>
+        <form action="/users" method="POST" class="form-container" style="max-width:400px;margin-bottom:2rem">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" name="nome" required>
+          </div>
+          <div class="form-group">
+            <label>Usuário (login)</label>
+            <input type="text" name="username" required>
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" name="password" required minlength="4">
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" name="role" value="admin">
+              Criar como administrador
+            </label>
+          </div>
+          <button type="submit" class="btn btn-full">Criar</button>
+        </form>
+      <% } else { %>
+        <div class="alert" style="background:#fff8e1;color:#f57f17;border:1px solid #ffe082">
+          📢 Registros desativados. Apenas administradores podem criar usuários.
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="alert" style="background:#e3f2fd;color:#1565c0;border:1px solid #bbdef5">
+        ℹ️ Você não tem permissão de administrador para gerenciar usuários.
       </div>
-      <div class="form-group">
-        <label>Senha</label>
-        <input type="password" name="password" required minlength="4">
-      </div>
-      <button type="submit" class="btn btn-full">Criar</button>
-    </form>
+    <% } %>
 
     <h2>Usuários Existentes</h2>
     <div class="card-grid">
       <% users.forEach(function(u) { %>
         <div class="card">
           <div class="card-body">
-            <p><strong><%= u.nome %></strong></p>
+            <p><strong><%= u.nome %></strong>
+              <% if (u.role === 'admin') { %>
+                <span class="badge" style="background:#e3f2fd;color:#1565c0">Admin</span>
+              <% } %>
+            </p>
             <p style="color:#666;font-size:0.9rem">@<%= u.username %></p>
             <p style="color:#888;font-size:0.8rem">Criado em: <%= new Date(u.createdAt).toLocaleDateString('pt-BR') %></p>
           </div>
-          <% if (u._id.toString() !== userName) { %>
-            <div class="card-footer">
+          <% if (isAdmin && u._id.toString() !== String(userName) && u.username !== 'admin') { %>
+            <div class="card-footer" style="display:flex;gap:6px;justify-content:flex-end">
+              <form action="/users/role/<%= u._id %>" method="POST">
+                <button type="submit" class="btn-small" style="background:#ff8f00">
+                  <%= u.role === 'admin' ? 'Rebaixar' : 'Promover' %>
+                </button>
+              </form>
               <form action="/users/delete/<%= u._id %>" method="POST" onsubmit="return confirm('Excluir este usuário?')">
-                <button type="submit" class="btn-danger">Excluir</button>
+                <button type="submit" class="btn-danger" style="padding:6px 12px;font-size:0.85rem">Excluir</button>
               </form>
             </div>
           <% } %>

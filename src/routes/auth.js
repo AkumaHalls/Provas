@@ -20,6 +20,7 @@ router.post('/login', async (req, res) => {
     }
     req.session.userId = user._id;
     req.session.userName = user.nome;
+    req.session.userRole = user.role;
     res.redirect('/');
   } catch (err) {
     res.render('login', { erro: 'Erro interno' });

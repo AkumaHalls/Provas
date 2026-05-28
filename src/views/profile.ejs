@@ -13,7 +13,7 @@
   </nav>
 
   <div class="container form-container">
-    <h2>Alterar Senha</h2>
+    <h2>Meu Perfil</h2>
 
     <% if (typeof erro !== 'undefined' && erro) { %>
       <div class="alert erro"><%= erro %></div>
@@ -22,10 +22,20 @@
       <div class="alert" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9"><%= sucesso %></div>
     <% } %>
 
-    <p><strong>Nome:</strong> <%= user.nome %></p>
-    <p><strong>Usuário:</strong> <%= user.username %></p>
+    <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <p><strong>Nome:</strong> <%= user.nome %></p>
+      <p><strong>Usuário:</strong> <%= user.username %></p>
+      <p><strong>Tipo:</strong>
+        <% if (user.role === 'admin') { %>
+          <span class="badge" style="background:#e3f2fd;color:#1565c0">Administrador</span>
+        <% } else { %>
+          <span class="badge" style="background:#f3e5f5;color:#7b1fa2">Usuário</span>
+        <% } %>
+      </p>
+    </div>
 
-    <form action="/profile" method="POST" style="margin-top:1.5rem">
+    <h2>Alterar Senha</h2>
+    <form action="/profile" method="POST" style="margin-top:1rem">
       <div class="form-group">
         <label>Senha atual *</label>
         <input type="password" name="senhaAtual" required>
@@ -41,7 +51,9 @@
       <button type="submit" class="btn btn-full">Salvar</button>
     </form>
 
-    <p style="margin-top:1rem;text-align:center"><a href="/users">Gerenciar usuários</a></p>
+    <p style="margin-top:1.5rem;text-align:center">
+      <a href="/users">⚙️ Gerenciar usuários</a>
+    </p>
   </div>
 </body>
 </html>
