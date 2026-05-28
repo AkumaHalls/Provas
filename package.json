@@ -1,7 +1,7 @@
 {
   "name": "sistema-provas",
   "version": "1.0.0",
-  "description": "Sistema de provas para entregadores - iFood, Uber, 99",
+  "description": "Hub de Ocorrências - Sistema de provas para entregadores (iFood, Uber, 99)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
