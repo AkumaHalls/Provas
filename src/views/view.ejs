@@ -46,6 +46,7 @@
       <% } %>
 
       <div class="detail-actions">
+        <a href="/evidence/<%= ev._id %>/edit" class="btn btn-edit">Editar</a>
         <form action="/evidence/<%= ev._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Excluir esta evidência? Isso também remove os arquivos.')">
           <button type="submit" class="btn-danger">Excluir</button>
         </form>

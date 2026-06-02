@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Evidência - Hub de Ocorrências</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="logo">📋 Editar Prova</span>
+    <span><a href="/">Voltar</a></span>
+  </nav>
+
+  <div class="container form-container">
+    <h2>Editar Evidência</h2>
+
+    <% if (typeof erro !== 'undefined' && erro) { %>
+      <div class="alert erro"><%= erro %></div>
+    <% } %>
+
+    <form action="/evidence/<%= ev._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Plataforma *</label>
+        <select name="plataforma" required>
+          <option value="">Selecione...</option>
+          <option value="iFood" <%= ev.plataforma === 'iFood' ? 'selected' : '' %>>iFood</option>
+          <option value="Uber Eats" <%= ev.plataforma === 'Uber Eats' ? 'selected' : '' %>>Uber Eats</option>
+          <option value="99" <%= ev.plataforma === '99' ? 'selected' : '' %>>99</option>
+          <option value="Outro" <%= ev.plataforma === 'Outro' ? 'selected' : '' %>>Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Problema *</label>
+        <select name="tipoProblema" required>
+          <option value="">Selecione...</option>
+          <option value="Cancelamento" <%= ev.tipoProblema === 'Cancelamento' ? 'selected' : '' %>>Cancelamento</option>
+          <option value="Atraso" <%= ev.tipoProblema === 'Atraso' ? 'selected' : '' %>>Atraso</option>
+          <option value="Problema no local" <%= ev.tipoProblema === 'Problema no local' ? 'selected' : '' %>>Problema no local</option>
+          <option value="Cliente ausente" <%= ev.tipoProblema === 'Cliente ausente' ? 'selected' : '' %>>Cliente ausente</option>
+          <option value="App travou" <%= ev.tipoProblema === 'App travou' ? 'selected' : '' %>>App travou</option>
+          <option value="Acidente" <%= ev.tipoProblema === 'Acidente' ? 'selected' : '' %>>Acidente</option>
+          <option value="Outro" <%= ev.tipoProblema === 'Outro' ? 'selected' : '' %>>Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição do ocorrido *</label>
+        <textarea name="descricao" rows="5" required placeholder="Descreva detalhadamente o que aconteceu..."><%= ev.descricao %></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Data e hora do ocorrido</label>
+          <input type="datetime-local" name="dataOcorrido" id="dataOcorrido" value="<%= ev.dataOcorrido ? new Date(ev.dataOcorrido).toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T') : '' %>">
+        </div>
+        <div class="form-group half">
+          <label>Valor da corrida</label>
+          <input type="text" name="valorCorrida" placeholder="Ex: R$ 15,90" value="<%= ev.valorCorrida || '' %>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Status do pedido</label>
+        <input type="text" name="statusPedido" placeholder="Ex: Cancelado após 30 min" value="<%= ev.statusPedido || '' %>">
+      </div>
+
+      <% if (ev.fileIds && ev.fileIds.length > 0) { %>
+        <div class="form-group">
+          <label>Arquivos atuais (<%= ev.fileIds.length %>)</label>
+          <div class="file-grid" style="margin-top:5px">
+            <% ev.fileIds.forEach(function(fid) { %>
+              <div class="file-item">
+                <a href="/evidence/file/<%= fid %>" target="_blank">
+                  <img src="/evidence/file/<%= fid %>" alt="Arquivo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                  <span class="file-fallback" style="display:none">📁 Arquivo</span>
+                </a>
+              </div>
+            <% }) %>
+          </div>
+          <small>Os arquivos existentes serão mantidos.</small>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label>Adicionar mais arquivos (prints, fotos, etc) - até 10 arquivos</label>
+        <input type="file" name="arquivos" multiple accept="image/*,.pdf,.mp4">
+        <small>Formatos aceitos: imagens, PDF, vídeos</small>
+      </div>
+
+      <button type="submit" class="btn btn-full">Atualizar Evidência</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('dataOcorrido');
+      if (el && !el.value) {
+        var now = new Date();
+        var brasilia = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+        var y = brasilia.getFullYear();
+        var m = String(brasilia.getMonth() + 1).padStart(2, '0');
+        var d = String(brasilia.getDate()).padStart(2, '0');
+        var h = String(brasilia.getHours()).padStart(2, '0');
+        var min = String(brasilia.getMinutes()).padStart(2, '0');
+        el.value = y + '-' + m + '-' + d + 'T' + h + ':' + min;
+      }
+    });
+  </script>
+</body>
+</html>

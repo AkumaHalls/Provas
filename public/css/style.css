@@ -72,7 +72,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .file-item a { display: block; width: 100%; height: 100%; text-decoration: none; color: inherit; }
 .file-item img { width: 100%; height: 100%; object-fit: cover; }
 .file-fallback { display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #e94560; }
-.detail-actions { padding: 1rem 1.5rem; border-top: 1px solid #2a2a4a; }
+.detail-actions { padding: 1rem 1.5rem; border-top: 1px solid #2a2a4a; display: flex; gap: 10px; align-items: center; }
+.btn-edit { padding: 8px 20px; background: #1a3a2a; color: #66bb6a; border: 1px solid #2a5a3a; border-radius: 8px; text-decoration: none; font-size: 0.9rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.btn-edit:hover { background: #2a4a3a; }
 
 .form-container { max-width: 600px; }
 .form-group { margin-bottom: 1.2rem; }

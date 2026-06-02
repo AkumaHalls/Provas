@@ -102,6 +102,63 @@ router.get('/file/:id', isAuthenticated, async (req, res) => {
   }
 });
 
+router.get('/:id/edit', isAuthenticated, async (req, res) => {
+  const ev = await Evidence.findById(req.params.id).lean();
+  if (!ev) return res.redirect('/');
+  if (ev.criadoPor.toString() !== req.session.userId.toString()) {
+    return res.redirect('/');
+  }
+  res.render('edit', { ev, erro: null, userName: req.session.userName });
+});
+
+router.put('/:id', isAuthenticated, upload.array('arquivos', 10), async (req, res) => {
+  try {
+    const ev = await Evidence.findById(req.params.id);
+    if (!ev) return res.status(404).send('Não encontrado');
+    if (ev.criadoPor.toString() !== req.session.userId.toString()) {
+      return res.status(403).send('Sem permissão');
+    }
+
+    const bucket = getGridFSBucket();
+    const fileIds = [...ev.fileIds];
+
+    for (const file of (req.files || [])) {
+      const filename = crypto.randomBytes(16).toString('hex') + path.extname(file.originalname);
+      const id = new mongoose.Types.ObjectId();
+
+      await new Promise((resolve, reject) => {
+        const stream = bucket.openUploadStreamWithId(id, filename, {
+          contentType: file.mimetype,
+          metadata: {
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            uploader: req.session.userId
+          }
+        });
+        stream.end(file.buffer);
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+      });
+
+      fileIds.push(id);
+    }
+
+    ev.plataforma = req.body.plataforma;
+    ev.tipoProblema = req.body.tipoProblema;
+    ev.descricao = req.body.descricao;
+    ev.dataOcorrido = req.body.dataOcorrido || new Date();
+    ev.statusPedido = req.body.statusPedido || '';
+    ev.valorCorrida = req.body.valorCorrida || '';
+    ev.fileIds = fileIds;
+    await ev.save();
+
+    res.redirect('/evidence/' + req.params.id);
+  } catch (err) {
+    const ev = await Evidence.findById(req.params.id).lean();
+    res.render('edit', { ev, erro: 'Erro ao atualizar: ' + err.message, userName: req.session.userName });
+  }
+});
+
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
     const ev = await Evidence.findById(req.params.id);
