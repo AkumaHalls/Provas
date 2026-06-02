@@ -33,16 +33,94 @@
         <div class="detail-files">
           <h3>Arquivos (<%= ev.fileIds.length %>)</h3>
           <div class="file-grid">
-            <% ev.fileIds.forEach(function(fid) { %>
-              <div class="file-item">
-                <a href="/evidence/file/<%= fid %>" target="_blank">
-                  <img src="/evidence/file/<%= fid %>" alt="Arquivo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                  <span class="file-fallback" style="display:none">📁 Visualizar arquivo</span>
-                </a>
+            <% ev.fileIds.forEach(function(fid, idx) { %>
+              <div class="file-item" onclick="openLightbox(<%= idx %>)" style="cursor:pointer">
+                <img src="/evidence/file/<%= fid %>" alt="Arquivo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <span class="file-fallback" style="display:none">📁 Visualizar</span>
               </div>
             <% }) %>
           </div>
         </div>
+
+        <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+          <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+          <span class="lightbox-prev" onclick="changeFile(-1)">&#10094;</span>
+          <span class="lightbox-next" onclick="changeFile(1)">&#10095;</span>
+          <div class="lightbox-content">
+            <img id="lightbox-img" class="lightbox-image">
+            <div id="lightbox-fallback" class="lightbox-fallback" style="display:none">
+              <p>📁 Arquivo não visualizável</p>
+              <a id="lightbox-open-btn" href="#" target="_blank" class="btn">Abrir em nova aba</a>
+            </div>
+            <div class="lightbox-counter" id="lightbox-counter"></div>
+          </div>
+        </div>
+
+        <script>
+          var fileIds = [<% ev.fileIds.forEach(function(fid) { %>'<%= fid %>',<% }) %>];
+          var currentIndex = 0;
+
+          function openLightbox(idx) {
+            currentIndex = idx;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            showFile(currentIndex);
+          }
+
+          function closeLightbox(e) {
+            if (e && e.target !== e.currentTarget && e.target.className !== 'lightbox-close') return;
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+          }
+
+          function showFile(idx) {
+            var img = document.getElementById('lightbox-img');
+            var fallback = document.getElementById('lightbox-fallback');
+            var openBtn = document.getElementById('lightbox-open-btn');
+            var counter = document.getElementById('lightbox-counter');
+            var url = '/evidence/file/' + fileIds[idx];
+
+            counter.textContent = (idx + 1) + '/' + fileIds.length;
+
+            img.style.display = 'none';
+            fallback.style.display = 'none';
+
+            img.onload = function() {
+              img.style.display = 'block';
+            };
+            img.onerror = function() {
+              fallback.style.display = 'flex';
+              openBtn.href = url;
+            };
+            img.src = url;
+          }
+
+          function changeFile(dir) {
+            currentIndex = (currentIndex + dir + fileIds.length) % fileIds.length;
+            showFile(currentIndex);
+          }
+
+          document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('lightbox').classList.contains('active')) return;
+            if (e.key === 'Escape') {
+              document.getElementById('lightbox').classList.remove('active');
+              document.body.style.overflow = '';
+            }
+            if (e.key === 'ArrowLeft') changeFile(-1);
+            if (e.key === 'ArrowRight') changeFile(1);
+          });
+
+          var touchStartX = 0;
+          document.getElementById('lightbox').addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+          });
+          document.getElementById('lightbox').addEventListener('touchend', function(e) {
+            var diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) {
+              changeFile(diff > 0 ? 1 : -1);
+            }
+          });
+        </script>
       <% } %>
 
       <div class="detail-actions">
